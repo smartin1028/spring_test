@@ -1,5 +1,7 @@
 package com.spring_test;
 
+import com.spring_test.dao.ConnectionMaker;
+import com.spring_test.dao.DConnectionMaker;
 import com.spring_test.dao.UserDao;
 import com.spring_test.domain.User;
 
@@ -7,10 +9,13 @@ import java.sql.SQLException;
 
 public class Main {
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
-		UserDao userDao = new UserDao();
+
+		ConnectionMaker connectionMaker = new DConnectionMaker();
+
+		UserDao userDao = new UserDao(connectionMaker);
 
 		User user = new User();
-		user.setId("test2");
+		user.setId("test3");
 		user.setName("testname");
 		user.setPassword("password");
 		

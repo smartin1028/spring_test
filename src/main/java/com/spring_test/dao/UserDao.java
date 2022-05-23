@@ -4,12 +4,16 @@ import com.spring_test.domain.User;
 
 import java.sql.*;
 
-public abstract class UserDao {
+public class UserDao {
 	private SimpleConnectionMaker simpleConnectionMaker;
 	private ConnectionMaker connectionMaker;
 
 	public UserDao() {
 		this.connectionMaker = new DConnectionMaker();
+	}
+
+	public UserDao(ConnectionMaker connectionMaker) {
+		this.connectionMaker = connectionMaker;
 	}
 
 	public void add(User user) throws ClassNotFoundException, SQLException {
@@ -53,7 +57,7 @@ public abstract class UserDao {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public abstract Connection simpleConnectionMaker() throws ClassNotFoundException, SQLException;
+//	public abstract Connection simpleConnectionMaker() throws ClassNotFoundException, SQLException;
 //	{
 //		Class.forName("org.h2.Driver");
 //		Connection c = DriverManager.getConnection(
