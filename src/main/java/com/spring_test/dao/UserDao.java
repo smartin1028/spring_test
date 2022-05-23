@@ -4,9 +4,10 @@ import com.spring_test.domain.User;
 
 import java.sql.*;
 
-public class UserDao {
+public abstract class UserDao {
+	private SimpleConnectionMaker simpleConnectionMaker;
 	public void add(User user) throws ClassNotFoundException, SQLException {
-		Connection c = getConnection();
+		Connection c = simpleConnectionMaker.makeNewConnection();
 
 		PreparedStatement ps = c.prepareStatement(
 				"insert into tb_user(id, name,password) values (?,?,?)"
@@ -20,7 +21,7 @@ public class UserDao {
 
 	}
 	public User get(String id) throws ClassNotFoundException, SQLException {
-		Connection c = getConnection();
+		Connection c = simpleConnectionMaker.makeNewConnection();
 
 		PreparedStatement ps = c.prepareStatement(
 				"select * from tb_user where id = ?"
@@ -40,11 +41,18 @@ public class UserDao {
 		return user;
 	}
 
-	private Connection getConnection() throws ClassNotFoundException, SQLException {
-		Class.forName("org.h2.Driver");
-		Connection c = DriverManager.getConnection(
-				"jdbc:h2:tcp://localhost/~/spring", "sa", ""
-		);
-		return c;
-	}
+	/**
+	 * 상속을 통한 확장 방법 제공
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public abstract Connection simpleConnectionMaker() throws ClassNotFoundException, SQLException;
+//	{
+//		Class.forName("org.h2.Driver");
+//		Connection c = DriverManager.getConnection(
+//				"jdbc:h2:tcp://localhost/~/spring", "sa", ""
+//		);
+//		return c;
+//	}
 }
