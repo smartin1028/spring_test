@@ -54,6 +54,31 @@ public class UserDao {
 		return user;
 	}
 
+	public int deleteAll() throws SQLException {
+		Connection c = dataSource.getConnection();
+		PreparedStatement ps = c.prepareStatement(
+				"truncate table tb_user"
+		);
+		int delCnt = ps.executeUpdate();
+		ps.close();
+		c.close();
+		return delCnt;
+	}
+
+	public int count() throws SQLException {
+		Connection c = dataSource.getConnection();
+		PreparedStatement ps = c.prepareStatement(
+				"select count(*) as cnt from tb_user"
+		);
+		ResultSet rs = ps.executeQuery();
+		rs.next();
+		int cnt = rs.getInt("cnt");
+
+		rs.close();
+		ps.close();
+		c.close();
+		return cnt;
+	}
 	public void setConnectionMaker(DConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}

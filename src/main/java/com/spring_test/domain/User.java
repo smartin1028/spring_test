@@ -1,12 +1,19 @@
 package com.spring_test.domain;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-
+@NoArgsConstructor
 public class User {
 	String id;
 	String name;
 	String password;
+
+	public User(String id, String name, String password) {
+		this.id = id;
+		this.name = name;
+		this.password = password;
+	}
 
 	public String getId() {
 		return id;

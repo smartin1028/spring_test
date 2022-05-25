@@ -2,6 +2,7 @@ package com.spring_test;
 
 import com.spring_test.dao.*;
 import com.spring_test.domain.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,11 @@ class UserDaoTest01 {
 		this.contextByGenericXml = new GenericXmlApplicationContext("config/spring/applicationContext.xml");
 		System.out.println("================================BeforeEachData end = " );
 	}
-
+	@AfterEach
+	public void AfterEach() throws SQLException {
+		UserDao userDao = contextByGenericXml.getBean("userDao", UserDao.class);
+		userDao.deleteAll();
+	}
 
 	@Test
 	public void userTest() throws Exception {
@@ -60,21 +65,21 @@ class UserDaoTest01 {
 		this.connectionMaker = contextByCounterDaoFactoryJava.getBean("connectionMaker", ConnectionMaker.class);
 		System.out.println("connectionMaker = " + connectionMaker);
 	}
-	@DisplayName("make connection counting test")
-	@Test
-	public void countingConnectionMaker() throws Exception {
-		countingConnectionMaker = contextByCounterDaoFactoryJava.getBean("connectionMaker", CountingConnectionMaker.class);
-		UserDao userDao = contextByCounterDaoFactoryJava.getBean("userDao", UserDao.class);
-		fnAddUser(userDao, "test12");
-
+//	@DisplayName("make connection counting test")
+//	@Test
+//	public void countingConnectionMaker() throws Exception {
+//		countingConnectionMaker = contextByCounterDaoFactoryJava.getBean("connectionMaker", CountingConnectionMaker.class);
+//		UserDao userDao = contextByCounterDaoFactoryJava.getBean("userDao", UserDao.class);
+//		fnAddUser(userDao, "test12");
+//
+////		countingConnectionMaker.makeConnection();
+//		int counter = countingConnectionMaker.getCounter();
+//		assertThat(counter).isEqualTo(1);
 //		countingConnectionMaker.makeConnection();
-		int counter = countingConnectionMaker.getCounter();
-		assertThat(counter).isEqualTo(1);
-		countingConnectionMaker.makeConnection();
-		counter = countingConnectionMaker.getCounter();
-		assertThat(counter).isEqualTo(2);
-
-	}
+//		counter = countingConnectionMaker.getCounter();
+//		assertThat(counter).isEqualTo(2);
+//
+//	}
 
 	private User fnAddUser(UserDao userDao, String createUserId) throws ClassNotFoundException, SQLException {
 		User user = new User();
@@ -86,7 +91,7 @@ class UserDaoTest01 {
 		return user;
 	}
 
-	@DisplayName("컨텍스트 테스트")
+	@DisplayName("xml 컨텍스트 user add")
 	@Test
 	public void applicationContextTest() throws Exception {
 		System.out.println("connectionMaker = " + contextByGenericXml);
@@ -112,17 +117,16 @@ class UserDaoTest01 {
 
 	}
 
-
-	@DisplayName("컨텍스트 테스트 ClassPathXmlApplicationContext_test")
-	@Test
-	public void ClassPathXmlApplicationContext_test() throws Exception {
-		UserDao userDao2 = contextByGenericXml.getBean("userDao", UserDao.class);
-		this.contextByClassPathXml = new ClassPathXmlApplicationContext("daoContext.xml", UserDao.class);
-		System.out.println("connectionMaker = " + contextByClassPathXml);
-		UserDao userDao3 = contextByClassPathXml.getBean("userDao", UserDao.class);
-		assertThat(userDao2).isNotEqualTo(userDao3);
-
-	}
+//
+//	@DisplayName("컨텍스트 테스트 ClassPathXmlApplicationContext_test")
+//	@Test
+//	public void ClassPathXmlApplicationContext_test() throws Exception {
+//		UserDao userDao2 = contextByGenericXml.getBean("userDao", UserDao.class);
+//		this.contextByClassPathXml = new ClassPathXmlApplicationContext("daoContext.xml", UserDao.class);
+//		System.out.println("connectionMaker = " + contextByClassPathXml);
+//		UserDao userDao3 = contextByClassPathXml.getBean("userDao", UserDao.class);
+//		assertThat(userDao2).isNotEqualTo(userDao3);
+//	}
 
 
 	@DisplayName("datasource 인터페이스 추가 - java")
@@ -154,7 +158,23 @@ class UserDaoTest01 {
 		assertThat(result.getPassword()).isEqualTo(user1.getPassword());
 		assertThat(result.getName()).isEqualTo(user1.getName());
 	}
+	@DisplayName("user 생성자 추가 user total count check")
+	@Test
+	public void user_add() throws Exception {
+		UserDao userDao = contextByDaoFactoryJava.getBean("userDao", UserDao.class);
+		int beforeCnt = userDao.count();
+		String id = "testid";
 
+		User user = new User(id, "testname", "password");
+		userDao.add(user);
 
+		assertThat(userDao.count()).isEqualTo(beforeCnt+1);
+
+		User user1 = userDao.get(user.getId());
+
+		assertThat(user.getId()).isEqualTo(user1.getId());
+		assertThat(user.getPassword()).isEqualTo(user1.getPassword());
+		assertThat(user.getName()).isEqualTo(user1.getName());
+	}
 
 }
