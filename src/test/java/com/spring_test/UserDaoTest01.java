@@ -1,10 +1,10 @@
 package com.spring_test;
 
-import com.spring_test.dao.ConnectionMaker;
-import com.spring_test.dao.DaoFactory;
-import com.spring_test.dao.UserDao;
+import com.spring_test.dao.*;
 import com.spring_test.domain.User;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 class UserDaoTest01 {
 
 	ConnectionMaker connectionMaker;
+	CountingConnectionMaker countingConnectionMaker;
 
 	AnnotationConfigApplicationContext context;
 
 	@BeforeEach
 	public void BeforeEachData(){
-		this.context = new AnnotationConfigApplicationContext(DaoFactory.class);
+		this.context = new AnnotationConfigApplicationContext(
+				CounterDaoFactory.class);
 	}
 
 
@@ -47,7 +49,28 @@ class UserDaoTest01 {
 		this.connectionMaker = context.getBean("connectionMaker", ConnectionMaker.class);
 		System.out.println("connectionMaker = " + connectionMaker);
 	}
+	@DisplayName("make connection counting test")
+	@Test
+	public void countingConnectionMaker() throws Exception {
+		countingConnectionMaker = context.getBean("connectionMaker", CountingConnectionMaker.class);
+		UserDao userDao = context.getBean("userDao", UserDao.class);
+		User user = new User();
+		String createUserId = "test10";
 
+		user.setId(createUserId);
+		user.setName("testname");
+		user.setPassword("password");
+
+		userDao.add(user);
+
+//		countingConnectionMaker.makeConnection();
+		int counter = countingConnectionMaker.getCounter();
+		Assertions.assertThat(counter).isEqualTo(1);
+		countingConnectionMaker.makeConnection();
+		counter = countingConnectionMaker.getCounter();
+		Assertions.assertThat(counter).isEqualTo(2);
+
+	}
 
 
 }
