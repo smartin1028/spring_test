@@ -2,9 +2,12 @@ package com.spring_test.dao;
 
 import com.spring_test.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class UserDao {
+	private DataSource dataSource;
+
 	private SimpleConnectionMaker simpleConnectionMaker;
 	private ConnectionMaker connectionMaker;
 
@@ -17,7 +20,7 @@ public class UserDao {
 	}
 
 	public void add(User user) throws ClassNotFoundException, SQLException {
-		Connection c = connectionMaker.makeConnection();
+		Connection c = dataSource.getConnection();
 
 		PreparedStatement ps = c.prepareStatement(
 				"insert into tb_user(id, name,password) values (?,?,?)"
@@ -31,7 +34,7 @@ public class UserDao {
 
 	}
 	public User get(String id) throws ClassNotFoundException, SQLException {
-		Connection c = connectionMaker.makeConnection();
+		Connection c = dataSource.getConnection();
 
 		PreparedStatement ps = c.prepareStatement(
 				"select * from tb_user where id = ?"
@@ -69,4 +72,9 @@ public class UserDao {
 //		);
 //		return c;
 //	}
+
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 }

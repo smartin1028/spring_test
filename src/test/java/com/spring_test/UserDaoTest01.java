@@ -2,7 +2,6 @@ package com.spring_test;
 
 import com.spring_test.dao.*;
 import com.spring_test.domain.User;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,24 +19,24 @@ class UserDaoTest01 {
 	ConnectionMaker connectionMaker;
 	CountingConnectionMaker countingConnectionMaker;
 
-	ApplicationContext context;
-	ApplicationContext context1;
-	ApplicationContext context2;
+	ApplicationContext contextByCounterDaoFactoryJava;
+	ApplicationContext contextByGenericXml;
+	ApplicationContext contextByClassPathXml;
+	ApplicationContext contextByDaoFactoryJava;
 
 	@BeforeEach
 	public void BeforeEachData(){
 		System.out.println("================================BeforeEachData = " );
-		this.context = new AnnotationConfigApplicationContext(CounterDaoFactory.class);
-		this.context1 = new GenericXmlApplicationContext("config/spring/applicationContext.xml");
-
-
+		this.contextByCounterDaoFactoryJava = new AnnotationConfigApplicationContext(CounterDaoFactory.class);
+		this.contextByDaoFactoryJava = new AnnotationConfigApplicationContext(DaoFactory.class);
+		this.contextByGenericXml = new GenericXmlApplicationContext("config/spring/applicationContext.xml");
 		System.out.println("================================BeforeEachData end = " );
 	}
 
 
 	@Test
 	public void userTest() throws Exception {
-		UserDao userDao = context.getBean("userDao", UserDao.class);
+		UserDao userDao = contextByCounterDaoFactoryJava.getBean("userDao", UserDao.class);
 
 		User user = new User();
 		String createUserId = "test11";
@@ -58,14 +57,14 @@ class UserDaoTest01 {
 
 	@Test
 	public void userDao() throws Exception {
-		this.connectionMaker = context.getBean("connectionMaker", ConnectionMaker.class);
+		this.connectionMaker = contextByCounterDaoFactoryJava.getBean("connectionMaker", ConnectionMaker.class);
 		System.out.println("connectionMaker = " + connectionMaker);
 	}
 	@DisplayName("make connection counting test")
 	@Test
 	public void countingConnectionMaker() throws Exception {
-		countingConnectionMaker = context.getBean("connectionMaker", CountingConnectionMaker.class);
-		UserDao userDao = context.getBean("userDao", UserDao.class);
+		countingConnectionMaker = contextByCounterDaoFactoryJava.getBean("connectionMaker", CountingConnectionMaker.class);
+		UserDao userDao = contextByCounterDaoFactoryJava.getBean("userDao", UserDao.class);
 		fnAddUser(userDao, "test12");
 
 //		countingConnectionMaker.makeConnection();
@@ -90,8 +89,8 @@ class UserDaoTest01 {
 	@DisplayName("컨텍스트 테스트")
 	@Test
 	public void applicationContextTest() throws Exception {
-		System.out.println("connectionMaker = " + context1);
-		UserDao userDao = context1.getBean("userDao", UserDao.class);
+		System.out.println("connectionMaker = " + contextByGenericXml);
+		UserDao userDao = contextByGenericXml.getBean("userDao", UserDao.class);
 		String id = "test14";
 		User result = fnAddUser(userDao, id);
 
@@ -105,8 +104,8 @@ class UserDaoTest01 {
 	@DisplayName("컨텍스트 테스트")
 	@Test
 	public void applicationContextTest02() throws Exception {
-		UserDao userDao1 = context.getBean("userDao", UserDao.class);
-		UserDao userDao2 = context1.getBean("userDao", UserDao.class);
+		UserDao userDao1 = contextByCounterDaoFactoryJava.getBean("userDao", UserDao.class);
+		UserDao userDao2 = contextByGenericXml.getBean("userDao", UserDao.class);
 
 
 		assertThat(userDao1).isNotEqualTo(userDao2);
@@ -117,14 +116,44 @@ class UserDaoTest01 {
 	@DisplayName("컨텍스트 테스트 ClassPathXmlApplicationContext_test")
 	@Test
 	public void ClassPathXmlApplicationContext_test() throws Exception {
-		UserDao userDao2 = context1.getBean("userDao", UserDao.class);
-		this.context2 = new ClassPathXmlApplicationContext("daoContext.xml", UserDao.class);
-		System.out.println("connectionMaker = " + context2);
-		UserDao userDao3 = context2.getBean("userDao", UserDao.class);
+		UserDao userDao2 = contextByGenericXml.getBean("userDao", UserDao.class);
+		this.contextByClassPathXml = new ClassPathXmlApplicationContext("daoContext.xml", UserDao.class);
+		System.out.println("connectionMaker = " + contextByClassPathXml);
+		UserDao userDao3 = contextByClassPathXml.getBean("userDao", UserDao.class);
 		assertThat(userDao2).isNotEqualTo(userDao3);
 
 	}
 
+
+	@DisplayName("datasource 인터페이스 추가 - java")
+	@Test
+	public void inteface_datasource_init_java() throws Exception {
+		UserDao userDao = contextByDaoFactoryJava.getBean("userDao", UserDao.class);
+
+		String id = "test15";
+		User result = fnAddUser(userDao, id);
+
+		User user1 = userDao.get(result.getId());
+
+		assertThat(result.getId()).isEqualTo(user1.getId());
+		assertThat(result.getPassword()).isEqualTo(user1.getPassword());
+		assertThat(result.getName()).isEqualTo(user1.getName());
+	}
+
+	@DisplayName("datasource 인터페이스 추가 - xml")
+	@Test
+	public void inteface_datasource_init_xml() throws Exception {
+		UserDao userDao = contextByDaoFactoryJava.getBean("userDao", UserDao.class);
+
+		String id = "test16";
+		User result = fnAddUser(userDao, id);
+
+		User user1 = userDao.get(result.getId());
+
+		assertThat(result.getId()).isEqualTo(user1.getId());
+		assertThat(result.getPassword()).isEqualTo(user1.getPassword());
+		assertThat(result.getName()).isEqualTo(user1.getName());
+	}
 
 
 
