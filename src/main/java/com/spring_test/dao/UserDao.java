@@ -51,6 +51,10 @@ public class UserDao {
 		return user;
 	}
 
+	public void setConnectionMaker(DConnectionMaker connectionMaker) {
+		this.connectionMaker = connectionMaker;
+	}
+
 	/**
 	 * 상속을 통한 확장 방법 제공
 	 * @return
