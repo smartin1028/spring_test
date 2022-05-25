@@ -55,28 +55,51 @@ public class UserDao {
 	}
 
 	public int deleteAll() throws SQLException {
-		Connection c = dataSource.getConnection();
-		PreparedStatement ps = c.prepareStatement(
-				"truncate table tb_user"
-		);
-		int delCnt = ps.executeUpdate();
-		ps.close();
-		c.close();
+		Connection c = null;
+		PreparedStatement ps = null;
+		int delCnt = -1;
+		try {
+			StatementStrategy strategy = new DeleteAllStatement();
+			c = dataSource.getConnection();
+			ps = strategy.makePreparedStatement(c);
+			delCnt = ps.executeUpdate();
+		} catch (SQLException e) {
+			throw e;
+		}finally {
+			if (ps != null) try {ps.close();} catch (SQLException e) { }
+			if (c != null) try {c.close();} catch (SQLException e) { }
+		}
+
 		return delCnt;
 	}
+//
+//	abstract protected PreparedStatement makeStatement(Connection c) throws SQLException;
+////	{
+////		return c.prepareStatement(
+////				"delete from tb_user where 1=1"
+////		);
+////	}
 
 	public int count() throws SQLException {
-		Connection c = dataSource.getConnection();
-		PreparedStatement ps = c.prepareStatement(
-				"select count(*) as cnt from tb_user"
-		);
-		ResultSet rs = ps.executeQuery();
-		rs.next();
-		int cnt = rs.getInt("cnt");
-
-		rs.close();
-		ps.close();
-		c.close();
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		int cnt = -1;
+		try {
+			c = dataSource.getConnection();
+			ps = c.prepareStatement(
+					"select count(*) as cnt from tb_user"
+			);
+			rs = ps.executeQuery();
+			rs.next();
+			cnt = rs.getInt("cnt");
+		} catch (SQLException e) {
+			throw e;
+		}finally {
+			if (rs != null) try {rs.close();} catch (SQLException e) { }
+			if (ps != null) try {ps.close();} catch (SQLException e) { }
+			if (c != null) try {c.close();} catch (SQLException e) { }
+		}
 		return cnt;
 	}
 	public void setConnectionMaker(DConnectionMaker connectionMaker) {

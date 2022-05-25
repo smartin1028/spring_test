@@ -160,7 +160,7 @@ class UserDaoTest01 {
 	}
 	@DisplayName("user 생성자 추가 user total count check")
 	@Test
-	public void user_add() throws Exception {
+	public void user_add_and_totalCount() throws Exception {
 		UserDao userDao = contextByDaoFactoryJava.getBean("userDao", UserDao.class);
 		int beforeCnt = userDao.count();
 		String id = "testid";
@@ -169,12 +169,15 @@ class UserDaoTest01 {
 		userDao.add(user);
 
 		assertThat(userDao.count()).isEqualTo(beforeCnt+1);
+		System.out.println("beforeCnt = " + (beforeCnt+1));
 
 		User user1 = userDao.get(user.getId());
 
 		assertThat(user.getId()).isEqualTo(user1.getId());
 		assertThat(user.getPassword()).isEqualTo(user1.getPassword());
 		assertThat(user.getName()).isEqualTo(user1.getName());
+		userDao.deleteAll();
+		assertThat(userDao.count()).isEqualTo(0);
 	}
 
 }
