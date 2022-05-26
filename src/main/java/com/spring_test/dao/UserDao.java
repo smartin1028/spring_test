@@ -31,33 +31,53 @@ public class UserDao {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public void add(final User user) throws ClassNotFoundException, SQLException {
-		/**
-		 * 메소드 내의 로컬 클래스로 이전한 AddStatement
-		 * 내부 로컬 클래스에서는 user 변수를 사용할 수 있으므로 넘겨주지 않아도 된다.
-		 */
-		class AddStatement implements StatementStrategy{
-//			User user;
+//	public void add(final User user) throws ClassNotFoundException, SQLException {
+//		/**
+//		 * 메소드 내의 로컬 클래스로 이전한 AddStatement
+//		 * 내부 로컬 클래스에서는 user 변수를 사용할 수 있으므로 넘겨주지 않아도 된다.
+//		 */
+//		class AddStatement implements StatementStrategy{
+////			User user;
+////
+////			public AddStatement(User user) {
+////				this.user = user;
+////			}
 //
-//			public AddStatement(User user) {
-//				this.user = user;
+//			@Override
+//			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+//				PreparedStatement ps = c.prepareStatement(
+//						"insert into tb_user(id, name,password) values (?,?,?)"
+//				);
+//				ps.setString(1, user.getId());
+//				ps.setString(2, user.getName());
+//				ps.setString(3, user.getPassword());
+//				return ps;
 //			}
+//		}
+//
+//		StatementStrategy strategy = new AddStatement();
+//		jdbcContextWithStatementStrategy(strategy);
+//	}
 
-			@Override
-			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-				PreparedStatement ps = c.prepareStatement(
-						"insert into tb_user(id, name,password) values (?,?,?)"
-				);
-				ps.setString(1, user.getId());
-				ps.setString(2, user.getName());
-				ps.setString(3, user.getPassword());
-				return ps;
-			}
-		}
-
-		StatementStrategy strategy = new AddStatement();
-		jdbcContextWithStatementStrategy(strategy);
+	/**
+	 * 익멸 내부 클래스로 전환
+	 *
+	 * @param user
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public void add(final User user) throws ClassNotFoundException, SQLException {
+		jdbcContextWithStatementStrategy(c -> {
+			PreparedStatement ps = c.prepareStatement(
+					"insert into tb_user(id, name,password) values (?,?,?)"
+			);
+			ps.setString(1, user.getId());
+			ps.setString(2, user.getName());
+			ps.setString(3, user.getPassword());
+			return ps;
+		});
 	}
+
 	public User get(String id) throws ClassNotFoundException, SQLException {
 		Connection c = dataSource.getConnection();
 
@@ -80,8 +100,12 @@ public class UserDao {
 	}
 
 	public int deleteAll() throws SQLException {
-		StatementStrategy strategy = new DeleteAllStatement();
-		int delCnt = jdbcContextWithStatementStrategy(strategy);
+		int delCnt = jdbcContextWithStatementStrategy(c -> {
+			PreparedStatement ps = c.prepareStatement(
+					"delete from tb_user where 1=1"
+			);
+			return ps;
+		});
 		return delCnt;
 	}
 
@@ -96,9 +120,15 @@ public class UserDao {
 			updateCnt = ps.executeUpdate();
 		} catch (SQLException e) {
 			throw e;
-		}finally {
-			if (ps != null) try {ps.close();} catch (SQLException e) { }
-			if (c != null) try {c.close();} catch (SQLException e) { }
+		} finally {
+			if (ps != null) try {
+				ps.close();
+			} catch (SQLException e) {
+			}
+			if (c != null) try {
+				c.close();
+			} catch (SQLException e) {
+			}
 		}
 		return updateCnt;
 	}
@@ -125,19 +155,30 @@ public class UserDao {
 			cnt = rs.getInt("cnt");
 		} catch (SQLException e) {
 			throw e;
-		}finally {
-			if (rs != null) try {rs.close();} catch (SQLException e) { }
-			if (ps != null) try {ps.close();} catch (SQLException e) { }
-			if (c != null) try {c.close();} catch (SQLException e) { }
+		} finally {
+			if (rs != null) try {
+				rs.close();
+			} catch (SQLException e) {
+			}
+			if (ps != null) try {
+				ps.close();
+			} catch (SQLException e) {
+			}
+			if (c != null) try {
+				c.close();
+			} catch (SQLException e) {
+			}
 		}
 		return cnt;
 	}
+
 	public void setConnectionMaker(DConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
 
 	/**
 	 * 상속을 통한 확장 방법 제공
+	 *
 	 * @return
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
@@ -150,8 +191,6 @@ public class UserDao {
 //		);
 //		return c;
 //	}
-
-
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
