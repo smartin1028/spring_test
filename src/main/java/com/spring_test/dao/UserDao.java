@@ -20,17 +20,8 @@ public class UserDao {
 	}
 
 	public void add(User user) throws ClassNotFoundException, SQLException {
-		Connection c = dataSource.getConnection();
-
-		PreparedStatement ps = c.prepareStatement(
-				"insert into tb_user(id, name,password) values (?,?,?)"
-		);
-		ps.setString(1, user.getId());
-		ps.setString(2, user.getName());
-		ps.setString(3, user.getPassword());
-		ps.executeUpdate();
-		ps.close();
-		c.close();
+		StatementStrategy strategy = new AddStatement(user);
+		jdbcContextWithStatementStrategy(strategy);
 
 	}
 	public User get(String id) throws ClassNotFoundException, SQLException {
@@ -55,22 +46,27 @@ public class UserDao {
 	}
 
 	public int deleteAll() throws SQLException {
+		StatementStrategy strategy = new DeleteAllStatement();
+		int delCnt = jdbcContextWithStatementStrategy(strategy);
+		return delCnt;
+	}
+
+	private int jdbcContextWithStatementStrategy(StatementStrategy strategy) throws SQLException {
 		Connection c = null;
 		PreparedStatement ps = null;
-		int delCnt = -1;
+		int updateCnt = -1;
 		try {
-			StatementStrategy strategy = new DeleteAllStatement();
+
 			c = dataSource.getConnection();
 			ps = strategy.makePreparedStatement(c);
-			delCnt = ps.executeUpdate();
+			updateCnt = ps.executeUpdate();
 		} catch (SQLException e) {
 			throw e;
 		}finally {
 			if (ps != null) try {ps.close();} catch (SQLException e) { }
 			if (c != null) try {c.close();} catch (SQLException e) { }
 		}
-
-		return delCnt;
+		return updateCnt;
 	}
 //
 //	abstract protected PreparedStatement makeStatement(Connection c) throws SQLException;
