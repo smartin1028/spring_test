@@ -197,8 +197,15 @@ public class UserDao {
 //		);
 //		return c;
 //	}
+
+	/**
+	 * dataSource가 DI될 때 JdbcContext 생성
+	 * @param dataSource
+	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+		// jdbcContext를 주입받지 않고 직접 생성
+
 		jdbcContext = new JdbcContext();
 		jdbcContext.setDataSource(dataSource);
 	}
