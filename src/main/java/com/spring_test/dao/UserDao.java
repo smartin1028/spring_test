@@ -8,8 +8,14 @@ import java.sql.*;
 public class UserDao {
 	private DataSource dataSource;
 
+	private JdbcContext jdbcContext;
+
 	private SimpleConnectionMaker simpleConnectionMaker;
 	private ConnectionMaker connectionMaker;
+
+	public void setJdbcContext(JdbcContext jdbcContext) {
+		this.jdbcContext = jdbcContext;
+	}
 
 	public UserDao() {
 		this.connectionMaker = new DConnectionMaker();
@@ -67,7 +73,7 @@ public class UserDao {
 	 * @throws SQLException
 	 */
 	public void add(final User user) throws ClassNotFoundException, SQLException {
-		jdbcContextWithStatementStrategy(c -> {
+		jdbcContext.workWithStatementStrategy(c -> {
 			PreparedStatement ps = c.prepareStatement(
 					"insert into tb_user(id, name,password) values (?,?,?)"
 			);
@@ -100,7 +106,7 @@ public class UserDao {
 	}
 
 	public int deleteAll() throws SQLException {
-		int delCnt = jdbcContextWithStatementStrategy(c -> {
+		int delCnt = jdbcContext.workWithStatementStrategy(c -> {
 			PreparedStatement ps = c.prepareStatement(
 					"delete from tb_user where 1=1"
 			);
@@ -193,5 +199,7 @@ public class UserDao {
 //	}
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+		jdbcContext = new JdbcContext();
+		jdbcContext.setDataSource(dataSource);
 	}
 }
