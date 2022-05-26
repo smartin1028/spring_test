@@ -33,4 +33,8 @@ public class JdbcContext {
 		}
 		return updateCnt;
 	}
+
+	public int excuteSql(String sql) throws SQLException {
+		return workWithStatementStrategy(c -> c.prepareStatement(sql));
+	}
 }

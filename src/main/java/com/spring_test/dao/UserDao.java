@@ -106,13 +106,11 @@ public class UserDao {
 	}
 
 	public int deleteAll() throws SQLException {
-		int delCnt = jdbcContext.workWithStatementStrategy(c -> {
-			PreparedStatement ps = c.prepareStatement(
-					"delete from tb_user where 1=1"
-			);
-			return ps;
-		});
-		return delCnt;
+		return jdbcContext.excuteSql("delete from tb_user where 1=1");
+	}
+
+	private int excuteSql(String sql) throws SQLException {
+		return jdbcContext.workWithStatementStrategy(c -> c.prepareStatement(sql));
 	}
 
 	private int jdbcContextWithStatementStrategy(StatementStrategy strategy) throws SQLException {
