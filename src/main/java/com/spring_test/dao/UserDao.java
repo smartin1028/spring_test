@@ -19,10 +19,44 @@ public class UserDao {
 		this.connectionMaker = connectionMaker;
 	}
 
-	public void add(User user) throws ClassNotFoundException, SQLException {
-		StatementStrategy strategy = new AddStatement(user);
-		jdbcContextWithStatementStrategy(strategy);
+//	public void add(User user) throws ClassNotFoundException, SQLException {
+//		StatementStrategy strategy = new AddStatement(user);
+//		jdbcContextWithStatementStrategy(strategy);
+//	}
 
+	/**
+	 * 내부 클래스에서 외부의 변수를 사용할 때는 외부 변수는 반드시 final로 선언해줘야 한다.
+	 * user파라미터는 메소드 내부에서 변경될 일이 없으므로 final로 선언해도 무방하다.
+	 * @param user
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public void add(final User user) throws ClassNotFoundException, SQLException {
+		/**
+		 * 메소드 내의 로컬 클래스로 이전한 AddStatement
+		 * 내부 로컬 클래스에서는 user 변수를 사용할 수 있으므로 넘겨주지 않아도 된다.
+		 */
+		class AddStatement implements StatementStrategy{
+//			User user;
+//
+//			public AddStatement(User user) {
+//				this.user = user;
+//			}
+
+			@Override
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"insert into tb_user(id, name,password) values (?,?,?)"
+				);
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				return ps;
+			}
+		}
+
+		StatementStrategy strategy = new AddStatement();
+		jdbcContextWithStatementStrategy(strategy);
 	}
 	public User get(String id) throws ClassNotFoundException, SQLException {
 		Connection c = dataSource.getConnection();
