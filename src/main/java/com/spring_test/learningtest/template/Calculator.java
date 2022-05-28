@@ -45,6 +45,19 @@ public class Calculator {
 		});
 	}
 
+	public Integer calcMultiply(String filePath) throws IOException {
+		return calcSum(filePath, br -> {
+			Integer multiply = 1;
+			String line;
+			while ((line = br.readLine()) != null) {
+				multiply *= Integer.valueOf(line);
+			}
+			return multiply;
+		});
+	}
+
+
+
 	public Integer calcSum(String filePath, BufferedReaderCallback callback) throws IOException {
 		BufferedReader br = null;
 		try {
