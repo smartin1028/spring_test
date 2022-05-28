@@ -1,7 +1,10 @@
 package com.spring_test.dao;
 
 import com.spring_test.domain.User;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -66,37 +69,34 @@ public class UserDao {
 
 
 	public int count() throws SQLException {
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		int cnt = -1;
-		try {
-			c = dataSource.getConnection();
-			ps = c.prepareStatement(
-					"select count(*) as cnt from tb_user"
-			);
-			rs = ps.executeQuery();
-			rs.next();
-			cnt = rs.getInt("cnt");
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			if (rs != null) try {
-				rs.close();
-			} catch (SQLException e) {
-			}
-			if (ps != null) try {
-				ps.close();
-			} catch (SQLException e) {
-			}
-			if (c != null) try {
-				c.close();
-			} catch (SQLException e) {
-			}
-		}
-		return cnt;
+		return Integer.valueOf(jdbcTemplate.queryForMap("select count(*) as cnt from tb_user").get("cnt").toString());
 	}
 
+	public int countV2() throws SQLException {
+		return jdbcTemplate.query(
+				con -> con.prepareStatement("select count(*) as cnt from tb_user"),
+				rs -> {
+					rs.next();
+					return rs.getInt("cnt");
+				}
+		);
+	}
+	public int countV1() throws SQLException {
+		return jdbcTemplate.query(new PreparedStatementCreator() {
+									  @Override
+									  public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+										  return con.prepareStatement("select count(*) as cnt from tb_user");
+									  }
+								  }, new ResultSetExtractor<Integer>() {
+
+									  @Override
+									  public Integer extractData(ResultSet rs) throws SQLException, DataAccessException {
+										  rs.next();
+										  return rs.getInt("cnt");
+									  }
+								  }
+		);
+	}
 	public void setConnectionMaker(DConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
