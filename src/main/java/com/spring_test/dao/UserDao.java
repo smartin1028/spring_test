@@ -31,15 +31,12 @@ public class UserDao {
 	 * @throws SQLException
 	 */
 	public void add(final User user) throws ClassNotFoundException, SQLException {
-		jdbcTemplate.update(c -> {
-			PreparedStatement ps = c.prepareStatement(
-					"insert into tb_user(id, name,password) values (?,?,?)"
-			);
-			ps.setString(1, user.getId());
-			ps.setString(2, user.getName());
-			ps.setString(3, user.getPassword());
-			return ps;
-		});
+		jdbcTemplate.update("insert into tb_user(id, name,password) values (?,?,?)"
+				, user.getId()
+				, user.getName()
+				, user.getPassword()
+		);
+
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
