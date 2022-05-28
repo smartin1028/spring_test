@@ -35,7 +35,11 @@ class CalcSumTest {
 	@Test
 	public void multiply_V1() throws Exception {
 		Assertions.assertThat(calculator.calcMultiply(numFilePath)).isEqualTo(24);
-
+	}
+	@DisplayName("문자열 합치기")
+	@Test
+	public void concatenate_V1() throws Exception {
+		Assertions.assertThat(calculator.concatenate(numFilePath)).isEqualTo("1234");
 	}
 
 
