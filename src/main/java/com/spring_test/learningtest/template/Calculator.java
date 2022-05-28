@@ -27,6 +27,10 @@ public class Calculator {
 	}
 
 	public Integer calcSum(String filePath) throws IOException {
+//		LineCallback sumCallback = (line, value) -> value + Integer.valueOf(line)
+		return lineReadTemplate(filePath,(line, value) -> value + Integer.valueOf(line), 0);
+	}
+	public Integer calcSumV2(String filePath) throws IOException {
 //		BufferedReaderCallback sumCallBack = br -> {
 //			Integer sum = 0;
 //			String line;
@@ -46,6 +50,10 @@ public class Calculator {
 	}
 
 	public Integer calcMultiply(String filePath) throws IOException {
+		return lineReadTemplate(filePath,(line, value) -> value * Integer.valueOf(line), 1);
+
+	}
+	public Integer calcMultiplyV1(String filePath) throws IOException {
 		return calcSum(filePath, br -> {
 			Integer multiply = 1;
 			String line;
@@ -55,8 +63,6 @@ public class Calculator {
 			return multiply;
 		});
 	}
-
-
 
 	public Integer calcSum(String filePath, BufferedReaderCallback callback) throws IOException {
 		BufferedReader br = null;
@@ -75,5 +81,26 @@ public class Calculator {
 		}
 	}
 
+
+	public Integer lineReadTemplate(String filePath, LineCallback callback, int initVal) throws IOException {
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(filePath));
+			Integer res = initVal;
+			String line;
+			while ((line = br.readLine()) != null) {
+				res = callback.doSomeThingWithLine(line, res);
+			}
+			return res;
+		} catch (IOException e) {
+			System.out.println("e.getMessage() = " + e.getMessage());
+			throw e;
+		} finally {
+			try {
+				if (br != null) br.close();
+			} catch (IOException io) {
+			}
+		}
+	}
 
 }
