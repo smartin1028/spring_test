@@ -50,6 +50,7 @@ public class Calculator {
 	}
 
 	public Integer calcMultiply(String filePath) throws IOException {
+		// tests
 		return lineReadTemplate(filePath,(line, value) -> value * Integer.valueOf(line), 1);
 
 	}
